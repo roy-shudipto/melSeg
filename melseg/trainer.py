@@ -1,7 +1,10 @@
+import numpy as np
 import torch
 from loguru import logger
-from statistics import mean
 from tqdm import tqdm
+
+
+from melseg.metric import PerformanceMetric
 
 
 class Trainer:
@@ -30,17 +33,21 @@ class Trainer:
         self.write_checkpoint = write_checkpoint
 
     def run(self) -> None:
+        # send model to device
         self.model.to(self.device)
 
         # variables to find the best-checkpoint (in validation)
         best_loss = None
         best_epoch = None
         best_model_state_dict = {}
+
+        # run training for each epoch
         for epoch in range(self.epochs):
-            epoch_losses = {"train": [], "val": []}
+            # initiate performance metric
+            pm = PerformanceMetric()
 
+            # run training for each phase
             for phase in ["train", "val"]:
-
                 if phase == "train":
                     self.model.train()  # set model to training mode
                 else:
@@ -56,42 +63,64 @@ class Trainer:
                     )
 
                     # compute loss
-                    predicted_masks = outputs.pred_masks.squeeze(1)
                     ground_truth_masks = (
                         batch["ground_truth_mask"].float().to(self.device)
-                    )
-                    loss = self.loss_func(
-                        predicted_masks, ground_truth_masks.unsqueeze(1)
-                    )
+                    ).unsqueeze(
+                        1
+                    )  # [batch, 1, 256, 256]
+                    predicted_masks = outputs.pred_masks.squeeze(
+                        1
+                    )  # [batch, 1, 256, 256]
+                    loss = self.loss_func(predicted_masks, ground_truth_masks)
 
+                    # backward pass
                     if phase == "train":
                         self.optimizer.zero_grad()
                         loss.backward()
                         self.optimizer.step()
 
-                    epoch_losses[phase].append(loss.item())
+                    # update performance metric
+                    gt = (
+                        ground_truth_masks.clone()
+                        .cpu()
+                        .numpy()
+                        .astype(np.uint8)
+                        .flatten()
+                    )
+                    pred = predicted_masks.clone().detach()
+                    pred = torch.sigmoid(pred)
+                    pred = pred.cpu().numpy().squeeze()
+                    pred = (pred > 0.5).astype(np.uint8).flatten()
 
-            # calc. mean loss
-            train_loss = mean(epoch_losses["train"])
-            val_loss = mean(epoch_losses["val"])
+                    pm.update(
+                        phase=phase,
+                        loss=loss.item(),
+                        groundtruth_mask=gt,
+                        prediction_mask=pred,
+                    )
+
+            # compute performance metric for this epoch
+            metric = pm.get_metric()
+            train_loss = metric.loss["train"]
+            val_loss = metric.loss["val"]
             logger.info(
                 f"Epoch: {epoch}; Train Loss: {train_loss}; Val Loss: {val_loss}"
             )
 
-            # evaluate performance for this epoch
+            # evaluate training-performance for this epoch
             if best_loss is None or val_loss <= best_loss:
                 best_loss = val_loss
                 best_epoch = epoch
                 for k, v in self.model.state_dict().items():
                     best_model_state_dict[k] = v.cpu()
 
-                logger.info("Better performance is FOUND.")
+                logger.info("Better performance is ACHIEVED.")
                 logger.info(f"Best epoch: {best_epoch}; Best Val Loss: {best_loss};")
             else:
-                logger.info("Better performance is NOT FOUND.")
+                logger.info("Better performance is NOT ACHIEVED.")
                 logger.info(f"Best epoch: {best_epoch}; Best Val Loss: {best_loss};")
 
-        # save the best-checkpoint (in validation)
+        # save the overall best-checkpoint (in validation)
         if self.write_checkpoint:
             torch.save(
                 {
