@@ -6,7 +6,7 @@
 # BATCH_SIZE: Batch size value.
 # EPOCHS: Number of epochs.
 # CROSS_VALIDATION_FOLDS: Number of cross-validation folds.
-# WRITE_CHECKPOINT: If [true], checkpoint will be saved as a .pt file.
+# WRITE_CHECKPOINT: If [True], checkpoint will be saved as a .pt file.
 
 DATASET_ROOT: "../datasets/HAM10000/"
 CHECKPOINT_ROOT: "../checkpoints/"
@@ -18,6 +18,6 @@ LEARNING_RATE:
   - 0.00001
 BATCH_SIZE: 
   - 2
-EPOCHS: 50
+EPOCHS: 5
 CROSS_VALIDATION_FOLDS: 3
 WRITE_CHECKPOINT: True

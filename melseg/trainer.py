@@ -1,4 +1,3 @@
-import copy
 import torch
 from loguru import logger
 from statistics import mean
@@ -36,7 +35,7 @@ class Trainer:
         # variables to find the best-checkpoint (in validation)
         best_loss = None
         best_epoch = None
-        best_model_state_dict = None
+        best_model_state_dict = {}
         for epoch in range(self.epochs):
             epoch_losses = {"train": [], "val": []}
 
@@ -47,7 +46,7 @@ class Trainer:
                 else:
                     self.model.eval()  # set model to evaluate mode
 
-                logger.info(f"\nRunning => Epoch {epoch} | Phase: {phase}")
+                logger.info(f"Running => Epoch: {epoch} | Phase: {phase}")
                 for batch in tqdm(self.dataloaders[phase]):
                     # forward pass
                     outputs = self.model(
@@ -83,7 +82,8 @@ class Trainer:
             if best_loss is None or val_loss <= best_loss:
                 best_loss = val_loss
                 best_epoch = epoch
-                best_model_state_dict = copy.deepcopy(self.model.state_dict())
+                for k, v in self.model.state_dict().items():
+                    best_model_state_dict[k] = v.cpu()
 
                 logger.info("Better performance is FOUND.")
                 logger.info(f"Best epoch: {best_epoch}; Best Val Loss: {best_loss};")
