@@ -5,6 +5,17 @@ LOG_EXTENSION = ".csv"
 LOG_HEADERS = [
     "EPOCH",
     "TRAIN LOSS",
+    "TRAIN ACCURACY",
+    "TRAIN PRECISION",
+    "TRAIN RECALL",
+    "TRAIN DICE",
+    "TRAIN IOU",
+    "VAL LOSS",
+    "VAL ACCURACY",
+    "VAL PRECISION",
+    "VAL RECALL",
+    "VAL DICE",
+    "VAL IOU",
 ]
 LOSS_FUNC_LIST = [
     "DiceCELoss",
