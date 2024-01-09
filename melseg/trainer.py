@@ -4,6 +4,7 @@ from loguru import logger
 from tqdm import tqdm
 
 
+from melseg.log import TrainingLog
 from melseg.metric import PerformanceMetric
 
 
@@ -33,6 +34,9 @@ class Trainer:
         self.write_checkpoint = write_checkpoint
 
     def run(self) -> None:
+        # initiate training-logging
+        training_log = TrainingLog()
+
         # send model to device
         self.model.to(self.device)
 
@@ -107,6 +111,9 @@ class Trainer:
                 f"Epoch: {epoch}; Train Loss: {train_loss}; Val Loss: {val_loss}"
             )
 
+            # update training-log
+            training_log.update(epoch=epoch, metric=metric)
+
             # evaluate training-performance for this epoch
             if best_loss is None or val_loss <= best_loss:
                 best_loss = val_loss
@@ -115,10 +122,10 @@ class Trainer:
                     best_model_state_dict[k] = v.cpu()
 
                 logger.info("Better performance is ACHIEVED.")
-                logger.info(f"Best epoch: {best_epoch}; Best Val Loss: {best_loss};")
+                logger.info(f"Best Epoch: {best_epoch}; Best Val Loss: {best_loss};")
             else:
                 logger.info("Better performance is NOT ACHIEVED.")
-                logger.info(f"Best epoch: {best_epoch}; Best Val Loss: {best_loss};")
+                logger.info(f"Best Epoch: {best_epoch}; Best Val Loss: {best_loss};")
 
         # save the overall best-checkpoint (in validation)
         if self.write_checkpoint:
@@ -132,6 +139,6 @@ class Trainer:
             )
             logger.info(f"Checkpoint is saved as: {self.checkpoint_path}")
 
-        # # save training-log
-        # training_log.save(path=self.log_path)
-        # logger.info(f"Training-log is saved as: {self.log_path}")
+        # save training-log
+        training_log.save(path=self.log_path)
+        logger.info(f"Training-log is saved as: {self.log_path}")
