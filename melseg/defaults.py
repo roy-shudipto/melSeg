@@ -10,7 +10,7 @@ LOSS_FUNC_LIST = [
     "DiceCELoss",
     "FocalLoss",
 ]
-OPTIMIZER_LIST = ["ADAM"]
+OPTIMIZER_LIST = ["ADAM", "SGD"]
 
 # SAM
 SAM_PRETRAINED_MODEL = "facebook/sam-vit-base"

@@ -62,7 +62,8 @@ def train(config: dict) -> None:
             epochs=training_config.epochs,
             train_dataloader=dataloader_dict["train"],
             val_dataloader=dataloader_dict["val"],
-            checkpoint_path=training_config.get_checkpoint_path(1),
+            checkpoint_path=training_config.get_checkpoint_path(fold + 1),
+            log_path=training_config.get_log_path(fold + 1),
             write_checkpoint=training_config.write_checkpoint,
         )
 

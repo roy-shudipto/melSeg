@@ -29,11 +29,10 @@ def get_device() -> torch.device:
 def get_loss_function(loss_func_name):
     # define loss-function
     if loss_func_name == "DiceCELoss":
-        return monai.losses.DiceCELoss(
-            sigmoid=True, squared_pred=True, reduction="mean"
-        )
+        return monai.losses.DiceCELoss(sigmoid=True, squared_pred=True)
     elif loss_func_name == "FocalLoss":
-        return monai.losses.FocalLoss(sigmoid=True, squared_pred=True, reduction="mean")
+        monai.losses.FocalLoss()
+        return monai.losses.FocalLoss()
     else:
         logger.error(f"[LOSS_FUNC: {loss_func_name}] is not supported.")
         exit(1)
@@ -44,6 +43,10 @@ def get_optimizer(optimizer_name, model, lr, weight_decay=0) -> optim.Optimizer:
     # define optimizer
     if optimizer_name.upper() == "ADAM":
         return optim.Adam(
+            model.mask_decoder.parameters(), lr=lr, weight_decay=weight_decay
+        )
+    if optimizer_name.upper() == "SGD":
+        return optim.SGD(
             model.mask_decoder.parameters(), lr=lr, weight_decay=weight_decay
         )
     else:

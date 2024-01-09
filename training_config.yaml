@@ -1,7 +1,7 @@
 # DATASET_ROOT: It should have two subdirectories called [images] and [masks].
 # CHECKPOINT ROOT: A sub-directory will be generated to save logs, plots and checkpoint.
 # LOSS_FUNC: Loss-function choices are ["DiceCELoss", "FocalLoss"].
-# OPTIMIZER: Choices are ["ADAM"].
+# OPTIMIZER: Choices are ["ADAM", "SGD"].
 # LEARNING_RATE: Learning rate value.
 # BATCH_SIZE: Batch size value.
 # EPOCHS: Number of epochs.

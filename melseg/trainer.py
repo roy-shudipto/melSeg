@@ -1,3 +1,4 @@
+import copy
 import torch
 from loguru import logger
 from statistics import mean
@@ -16,6 +17,7 @@ class Trainer:
         train_dataloader,
         val_dataloader,
         checkpoint_path,
+        log_path,
         write_checkpoint,
     ) -> None:
         self.model = model
@@ -25,11 +27,16 @@ class Trainer:
         self.epochs = epochs
         self.dataloaders = {"train": train_dataloader, "val": val_dataloader}
         self.checkpoint_path = checkpoint_path
+        self.log_path = log_path
         self.write_checkpoint = write_checkpoint
 
     def run(self) -> None:
         self.model.to(self.device)
 
+        # variables to find the best-checkpoint (in validation)
+        best_loss = None
+        best_epoch = None
+        best_model_state_dict = None
         for epoch in range(self.epochs):
             epoch_losses = {"train": [], "val": []}
 
@@ -65,9 +72,37 @@ class Trainer:
 
                     epoch_losses[phase].append(loss.item())
 
+            # calc. mean loss
+            train_loss = mean(epoch_losses["train"])
+            val_loss = mean(epoch_losses["val"])
             logger.info(
-                f"Epoch: {epoch}; Train Loss: {mean(epoch_losses['train'])}; Val Loss: {mean(epoch_losses['val'])}"
+                f"Epoch: {epoch}; Train Loss: {train_loss}; Val Loss: {val_loss}"
             )
 
+            # evaluate performance for this epoch
+            if best_loss is None or val_loss <= best_loss:
+                best_loss = val_loss
+                best_epoch = epoch
+                best_model_state_dict = copy.deepcopy(self.model.state_dict())
+
+                logger.info("Better performance is FOUND.")
+                logger.info(f"Best epoch: {best_epoch}; Best Val Loss: {best_loss};")
+            else:
+                logger.info("Better performance is NOT FOUND.")
+                logger.info(f"Best epoch: {best_epoch}; Best Val Loss: {best_loss};")
+
+        # save the best-checkpoint (in validation)
         if self.write_checkpoint:
-            torch.save(self.model.state_dict(), self.checkpoint_path)
+            torch.save(
+                {
+                    "loss": best_loss,
+                    "epoch": best_epoch,
+                    "model_state_dict": best_model_state_dict,
+                },
+                self.checkpoint_path,
+            )
+            logger.info(f"Checkpoint is saved as: {self.checkpoint_path}")
+
+        # # save training-log
+        # training_log.save(path=self.log_path)
+        # logger.info(f"Training-log is saved as: {self.log_path}")
