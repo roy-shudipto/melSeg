@@ -6,9 +6,9 @@ from statistics import mean
 class Metric:
     def __init__(self) -> None:
         self.loss = {"train": None, "val": None}
+        self.accuracy = {"train": None, "val": None}
         self.precision = {"train": None, "val": None}
         self.recall = {"train": None, "val": None}
-        self.accuracy = {"train": None, "val": None}
         self.dice = {"train": None, "val": None}
         self.iou = {"train": None, "val": None}
 
@@ -16,11 +16,19 @@ class Metric:
 class PerformanceMetric:
     def __init__(self) -> None:
         self.loss_list = {"train": [], "val": []}
+        self.accuracy_list = {"train": [], "val": []}
         self.precision_list = {"train": [], "val": []}
         self.recall_list = {"train": [], "val": []}
-        self.accuracy_list = {"train": [], "val": []}
         self.dice_list = {"train": [], "val": []}
         self.iou_list = {"train": [], "val": []}
+
+    @classmethod
+    def calc_accuracy(cls, groundtruth_mask, pred_mask):
+        intersect = np.sum(pred_mask * groundtruth_mask)
+        union = np.sum(pred_mask) + np.sum(groundtruth_mask) - intersect
+        xor = np.sum(groundtruth_mask == pred_mask)
+        acc = np.mean(xor / (union + xor - intersect))
+        return acc
 
     @classmethod
     def calc_precision(cls, groundtruth_mask, pred_mask):
@@ -35,14 +43,6 @@ class PerformanceMetric:
         total_pixel_truth = np.sum(groundtruth_mask)
         recall = np.mean(intersect / total_pixel_truth)
         return recall
-
-    @classmethod
-    def calc_accuracy(cls, groundtruth_mask, pred_mask):
-        intersect = np.sum(pred_mask * groundtruth_mask)
-        union = np.sum(pred_mask) + np.sum(groundtruth_mask) - intersect
-        xor = np.sum(groundtruth_mask == pred_mask)
-        acc = np.mean(xor / (union + xor - intersect))
-        return acc
 
     @classmethod
     def calc_dice(cls, groundtruth_mask, pred_mask):
@@ -60,9 +60,9 @@ class PerformanceMetric:
 
     def run_metric_calculation(self, groundtruth_mask, prediction_mask):
         return {
+            "accuracy": self.calc_accuracy(groundtruth_mask, prediction_mask),
             "precision": self.calc_precision(groundtruth_mask, prediction_mask),
             "recall": self.calc_recall(groundtruth_mask, prediction_mask),
-            "accuracy": self.calc_accuracy(groundtruth_mask, prediction_mask),
             "dice": self.calc_dice(groundtruth_mask, prediction_mask),
             "iou": self.calc_iou(groundtruth_mask, prediction_mask),
         }
@@ -90,14 +90,14 @@ class PerformanceMetric:
         # update metric: loss
         self.loss_list[phase].append(loss)
 
+        # update metric: accuracy
+        self.accuracy_list[phase].append(metric_dict["accuracy"])
+
         # update metric: precision
         self.precision_list[phase].append(metric_dict["precision"])
 
         # update metric: recall
         self.recall_list[phase].append(metric_dict["recall"])
-
-        # update metric: accuracy
-        self.accuracy_list[phase].append(metric_dict["accuracy"])
 
         # update metric: dice
         self.dice_list[phase].append(metric_dict["dice"])
@@ -110,9 +110,9 @@ class PerformanceMetric:
 
         for phase in ["train", "val"]:
             metric.loss[phase] = round(mean(self.loss_list[phase]), 4)
+            metric.accuracy[phase] = round(mean(self.accuracy_list[phase]), 4)
             metric.precision[phase] = round(mean(self.precision_list[phase]), 4)
             metric.recall[phase] = round(mean(self.recall_list[phase]), 4)
-            metric.accuracy[phase] = round(mean(self.accuracy_list[phase]), 4)
             metric.dice[phase] = round(mean(self.dice_list[phase]), 4)
             metric.iou[phase] = round(mean(self.iou_list[phase]), 4)
 
