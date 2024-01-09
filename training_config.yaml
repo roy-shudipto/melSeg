@@ -1,0 +1,23 @@
+# DATASET_ROOT: It should have two subdirectories called [images] and [masks].
+# CHECKPOINT ROOT: A sub-directory will be generated to save logs, plots and checkpoint.
+# LOSS_FUNC: Loss-function choices are ["DiceCELoss", "FocalLoss"].
+# OPTIMIZER: Choices are ["ADAM"].
+# LEARNING_RATE: Learning rate value.
+# BATCH_SIZE: Batch size value.
+# EPOCHS: Number of epochs.
+# CROSS_VALIDATION_FOLDS: Number of cross-validation folds.
+# WRITE_CHECKPOINT: If [true], checkpoint will be saved as a .pt file.
+
+DATASET_ROOT: "../datasets/HAM10000/"
+CHECKPOINT_ROOT: "../checkpoints/"
+LOSS_FUNC:
+  - "DiceCELoss"
+OPTIMIZER: 
+  - "ADAM"
+LEARNING_RATE: 
+  - 0.00001
+BATCH_SIZE: 
+  - 2
+EPOCHS: 50
+CROSS_VALIDATION_FOLDS: 3
+WRITE_CHECKPOINT: True
