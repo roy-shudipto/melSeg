@@ -16,8 +16,39 @@ This is a tool to train semantic-segmentation model targeting skin leison segmen
 This pipeline will start training a semantic-segmentation model.  
 Training-parameters can be seen or, modified from `training_config.yaml`.
 
-### Check help
+#### Check help
 `python3 melseg_trainer.py --help`
 
-### Command example
+#### Command example
 `python3 melseg_trainer.py --config training_config.yaml`
+
+## Metric Calculation
+Following metrics are calculated while training the model.   
+
+#### PRECISION
+Precision score is the number of true positive results divided by the number of all positive results.
+
+$$Precision=TP/(TP+FP)$$
+
+#### RECALL
+Recall score, also known as Sensitivity or true positive rate, is the number of true positive results 
+divided by the number of all samples that should have been identified as positive.
+
+$$Recall=TP/(TP+FN)$$
+
+#### ACCURACY
+Accuracy score, also known as Rand index is the number of correct predictions, consisting of correct 
+positive and negative predictions divided by the total number of predictions.
+
+$$Accuracy=(TP+TN)/(TP+TN+FP+FN)$$
+
+#### DICE COEFFICIENT (F1-SCORE)
+Dice coefficient, also known as F1 score is the harmonic mean of precision and recall. 
+In other words, it is calculated by *2 x intersection* divided by the *total number of pixel in both images*.
+$$Dice=2TP/(2TP+FP+FN)$$
+
+#### INTERSECTION OVER UNION (IoU)
+Intersection over Union (IoU), also known as Jaccard index is the area of the intersection over union of the predicted segmentation and the ground truth.
+$$IoU=TP/(TP+FP+FN)$$
+
+*Ref: https://www.kaggle.com/code/nghihuynh/understanding-evaluation-metrics-in-segmentation/notebook*
