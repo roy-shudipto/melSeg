@@ -45,7 +45,8 @@ def split_config(config, outdir) -> None:
 
     # generate individual sweeps of training-config
     for idx, config_variation in enumerate(config_variations):
-        out_path = outdir / pathlib.Path(f"training_config_{idx+1}").with_suffix(
+        ref = str(idx + 1).zfill(2)  # example: 01, 02, ... 30
+        out_path = outdir / pathlib.Path(f"training_config_{ref}").with_suffix(
             CONFIG_EXTENSION
         )
 
