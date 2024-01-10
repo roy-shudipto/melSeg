@@ -35,6 +35,15 @@ This pipeline saves the analysis report as a *[.csv]* file.
 #### Command example
 `python3 melseg_analyzer.py --root example_logs/ --outpath example_logs/log_analysis.csv`
 
+## Split Config
+This pipeline generates individual sweeps from a training-config.
+
+#### Check help
+`python3 config_splitter.py --help`
+
+#### Command example
+`python3 config_splitter.py --config training_config.yaml --outdir example_configs`
+
 ## Code Formatting
 **Black** is a Python code formatter that enforces a consistent style by rewriting code to conform to **PEP 8** style guide.
 
