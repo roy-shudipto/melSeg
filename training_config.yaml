@@ -5,7 +5,7 @@
 # LEARNING_RATE: Learning rate value.
 # BATCH_SIZE: Batch size value.
 # EPOCHS: Number of epochs.
-# CROSS_VALIDATION_FOLDS: Number of cross-validation folds.
+# CROSS_VALIDATION_FOLDS: Number of cross-validation folds (2 or, greater).
 # WRITE_CHECKPOINT: If [True], checkpoint will be saved as a .pt file.
 
 DATASET_ROOT: "../datasets/HAM10000/"

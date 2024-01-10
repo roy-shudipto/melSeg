@@ -12,8 +12,8 @@ This is a tool to train semantic-segmentation model targeting skin leison segmen
 - Move all Mask-images to the sub-directory: : **HAM10000/masks**
 
 
-## Run training
-This pipeline will start training a semantic-segmentation model.  
+## Run Training
+This pipeline starts training a semantic-segmentation model.  
 Training-parameters can be seen or, modified from `training_config.yaml`.
 
 #### Check help
@@ -21,6 +21,19 @@ Training-parameters can be seen or, modified from `training_config.yaml`.
 
 #### Command example
 `python3 melseg_trainer.py --config training_config.yaml`
+
+
+## Run Analysis
+This pipeline analyzes the training-logs [.csv] of a cross-validation run by:
+- finding the best performance of each fold using minimum loss and maximum epoch
+- and, calculating average of fold-wise best performances.
+This pipeline saves the analysis report as a [.csv] file.
+
+#### Check help
+`python3 melseg_analyzer.py --help`
+
+#### Command example
+`python3 melseg_analyzer.py --root example_logs/ --outpath example_logs/log_analysis.csv`
 
 ## Metric Calculation
 Following metrics are calculated while training the model.   

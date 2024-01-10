@@ -98,5 +98,5 @@ def run_training(config) -> None:
 
 
 if __name__ == "__main__":
-    logger.info("Running model-training pipeline.")
+    logger.info("This pipeline trains a semantic segmentation model.")
     run_training()
