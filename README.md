@@ -36,18 +36,16 @@ This pipeline saves the analysis report as a *[.csv]* file.
 `python3 melseg_analyzer.py --root example_logs/ --outpath example_logs/log_analysis.csv`
 
 ## Code Formatting
-Black is a Python code formatter that enforces a consistent style by rewriting code to conform to PEP 8 style guide.
+**Black** is a Python code formatter that enforces a consistent style by rewriting code to conform to **PEP 8** style guide.
 
 #### Command
 `sh run_black.sh`
 
 ## Code Linting
-Linting is the process of static code analysis that examines your code for errors, stylistic issues, and potential problems. There are many different linters available for Python, Flake8 is used here.
-#### Command
-`sh run_flake8.sh`
+Linting is the process of static code analysis that examines code for errors, stylistic issues, and potential problems. There are many different linters available for Python, **Flake8** is used here.
 
 #### Command
-`sh run_black.sh`
+`sh run_flake8.sh`
 
 ## Metric Calculation
 Following metrics are calculated while training the model.   
