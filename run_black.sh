@@ -1,2 +1,2 @@
-black ./*.py
-black ./*/*.py
+black ./*.py --preview
+black ./*/*.py --preview

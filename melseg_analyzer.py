@@ -85,7 +85,8 @@ def analyze(root, outpath) -> None:
         # skip log file with invalid extension
         if log_path.suffix.lower() != LOG_EXTENSION.lower():
             logger.debug(
-                f"Skipping file: [{log_path}] as it does not have [{LOG_EXTENSION}] extension."
+                f"Skipping file: [{log_path}] as it does not have [{LOG_EXTENSION}]"
+                " extension."
             )
             continue
 
@@ -99,7 +100,8 @@ def analyze(root, outpath) -> None:
         # skip log file with invalid column list
         if sorted(df.columns.tolist()) != sorted(LOG_HEADERS):
             logger.debug(
-                f"Skipping file: [{log_path}] as it is has invalid columns: {df.columns.tolist()}. Expected columns are: {LOG_HEADERS}."
+                f"Skipping file: [{log_path}] as it is has invalid columns:"
+                f" {df.columns.tolist()}. Expected columns are: {LOG_HEADERS}."
             )
             continue
 

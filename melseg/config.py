@@ -45,7 +45,8 @@ class TrainingConfig:
         # check: cross_validation_fold is valid
         if self.cross_validation_fold < 2:
             logger.error(
-                f"Cross Valiadation Fold: {self.cross_validation_fold} is not supported."
+                f"Cross Valiadation Fold: {self.cross_validation_fold} is not"
+                " supported."
             )
             logger.error("Supported Cross Valiadation Fold: any integer >= 2.")
             exit(1)

@@ -21,7 +21,8 @@ def train(config: dict) -> None:
     # create a directory for checkpoint
     training_config.checkpoint_directory.mkdir(parents=True, exist_ok=True)
     logger.info(
-        f"Successfully created checkpoint directory: {training_config.checkpoint_directory}"
+        "Successfully created checkpoint directory:"
+        f" {training_config.checkpoint_directory}"
     )
 
     # save training-config in checkpoint-directory
@@ -36,7 +37,8 @@ def train(config: dict) -> None:
     # run training for each fold
     for fold in range(training_config.cross_validation_fold):
         logger.info(
-            f"Starting training for fold: {fold + 1}/{training_config.cross_validation_fold}"
+            "Starting training for fold:"
+            f" {fold + 1}/{training_config.cross_validation_fold}"
         )
 
         # define model

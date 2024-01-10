@@ -72,7 +72,8 @@ class PerformanceMetric:
         groundtruth_mask = np.array(groundtruth_mask)
         if len(groundtruth_mask.shape) != 1:
             logger.error(
-                "For metric calculaition, groundtruth-mask is expected to be a 1-d array."
+                "For metric calculaition, groundtruth-mask is expected to be a 1-d"
+                " array."
             )
             exit(1)
 
@@ -80,7 +81,8 @@ class PerformanceMetric:
         prediction_mask = np.array(prediction_mask)
         if len(prediction_mask.shape) != 1:
             logger.error(
-                "For metric calculaition, prediction-mask is expected to be a 1-d array."
+                "For metric calculaition, prediction-mask is expected to be a 1-d"
+                " array."
             )
             exit(1)
 
