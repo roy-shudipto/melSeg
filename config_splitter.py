@@ -50,6 +50,9 @@ def split_config(config, outdir) -> None:
             CONFIG_EXTENSION
         )
 
+        # add referencegit sta
+        config_variation["CONFIG_REFERENCE"] = f"training_config_{ref}"
+
         # save
         with open(out_path, "w") as file:
             yaml.dump(config_variation, file, sort_keys=False)
