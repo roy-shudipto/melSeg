@@ -22,6 +22,7 @@ class Trainer:
         checkpoint_path,
         log_path,
         write_checkpoint,
+        training_ref="",
     ) -> None:
         self.model = model
         self.device = device
@@ -32,6 +33,7 @@ class Trainer:
         self.checkpoint_path = checkpoint_path
         self.log_path = log_path
         self.write_checkpoint = write_checkpoint
+        self.training_ref = training_ref
 
     def run(self) -> None:
         # initiate training-logging
@@ -57,7 +59,9 @@ class Trainer:
                 else:
                     self.model.eval()  # set model to evaluate mode
 
-                logger.info(f"Running => Epoch: {epoch} | Phase: {phase}")
+                logger.info(
+                    f"Running >> {self.training_ref} | Epoch: {epoch} | Phase: {phase}"
+                )
                 for batch in tqdm(self.dataloaders[phase]):
                     # forward pass
                     outputs = self.model(

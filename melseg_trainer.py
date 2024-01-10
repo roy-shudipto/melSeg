@@ -13,7 +13,7 @@ from melseg.dataset import SegDataset
 from melseg.trainer import Trainer
 
 
-def train(config: dict) -> None:
+def train(config: dict, config_ref=None) -> None:
     # get training-config
     training_config = TrainingConfig(config)
     logger.info("Successfully read training-config.")
@@ -36,10 +36,10 @@ def train(config: dict) -> None:
 
     # run training for each fold
     for fold in range(training_config.cross_validation_fold):
-        logger.info(
-            "Starting training for fold:"
-            f" {fold + 1}/{training_config.cross_validation_fold}"
-        )
+        # get training-fold reference
+        fold_ref = f"Fold: {fold + 1}/{training_config.cross_validation_fold}"
+
+        logger.info(f"Starting training for {fold_ref}")
 
         # define model
         model = get_model()
@@ -55,6 +55,9 @@ def train(config: dict) -> None:
         # get dataloader
         dataloader_dict = seg_dataset.get_dataloader(fold, training_config.batch_size)
 
+        # get training reference
+        training_ref = fold_ref if not config_ref else f"{config_ref} | {fold_ref}"
+
         # get trainer
         trainer = Trainer(
             model=model,
@@ -67,6 +70,7 @@ def train(config: dict) -> None:
             checkpoint_path=training_config.get_checkpoint_path(fold + 1),
             log_path=training_config.get_log_path(fold + 1),
             write_checkpoint=training_config.write_checkpoint,
+            training_ref=training_ref,
         )
 
         # run trainer
@@ -93,10 +97,12 @@ def run_training(config) -> None:
 
     # train
     for idx, config_variation in enumerate(config_variations):
-        logger.info(
-            f"Training with training-config: {idx + 1} / {len(config_variations)}."
-        )
-        train(config_variation)
+        # get reference for training-config
+        config_ref = f"Config: {idx + 1}/{len(config_variations)}"
+
+        # train
+        logger.info(f"Training with {config_ref}.")
+        train(config_variation, config_ref)
 
 
 if __name__ == "__main__":
