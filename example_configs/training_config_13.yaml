@@ -1,5 +1,5 @@
-DATASET_ROOT: ../datasets/HAM10000/
-CHECKPOINT_ROOT: ../checkpoints/
+DATASET_ROOT: /content/HAM10000/
+CHECKPOINT_ROOT: /content/checkpoints/
 LOSS_FUNC: FocalLoss
 OPTIMIZER: ADAM
 LEARNING_RATE: 1.0e-06
