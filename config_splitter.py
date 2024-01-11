@@ -50,7 +50,7 @@ def split_config(config, outdir) -> None:
             CONFIG_EXTENSION
         )
 
-        # add referencegit sta
+        # include config-reference
         config_variation["CONFIG_REFERENCE"] = f"training_config_{ref}"
 
         # save

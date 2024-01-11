@@ -3,9 +3,14 @@ import pathlib
 from datasets import Dataset
 from loguru import logger
 from sklearn.model_selection import StratifiedKFold
+from sklearn.utils import shuffle
 from torch.utils.data import DataLoader
 
-from melseg.defaults import HAM10000_MASK_EXTENSION, HAM10000_MASK_NAMING_CONVENTION
+from melseg.defaults import (
+    DATASET_SHUFFLE_SEED,
+    HAM10000_MASK_EXTENSION,
+    HAM10000_MASK_NAMING_CONVENTION,
+)
 from melseg.sam_dataset import SAMDataset
 
 
@@ -46,6 +51,11 @@ class SegDataset:
 
             self.image_paths.append(image_path.as_posix())
             self.mask_paths.append(mask_path.as_posix())
+
+        # shuffle data
+        self.image_paths, self.mask_paths = shuffle(
+            self.image_paths, self.mask_paths, random_state=DATASET_SHUFFLE_SEED
+        )
 
     def get_dataloader(self, fold_index, batch_size):
         # check: valid fold-index
