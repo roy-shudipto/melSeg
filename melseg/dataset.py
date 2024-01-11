@@ -35,6 +35,8 @@ class SegDataset:
             exit(1)
 
         # check: every image path has a mask path.
+        image_paths = []
+        mask_paths = []
         for image_path in (self.dataset_root / "images").iterdir():
             mask_path = (
                 self.dataset_root
@@ -49,12 +51,12 @@ class SegDataset:
                 logger.error(f"Mask Path: {mask_path} does not exist.")
                 exit(1)
 
-            self.image_paths.append(image_path.as_posix())
-            self.mask_paths.append(mask_path.as_posix())
+            image_paths.append(image_path.as_posix())
+            mask_paths.append(mask_path.as_posix())
 
         # shuffle data
         self.image_paths, self.mask_paths = shuffle(
-            self.image_paths, self.mask_paths, random_state=DATASET_SHUFFLE_SEED
+            image_paths, mask_paths, random_state=DATASET_SHUFFLE_SEED
         )
 
     def get_dataloader(self, fold_index, batch_size):
