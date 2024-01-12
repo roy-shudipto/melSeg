@@ -1,5 +1,5 @@
-DATASET_ROOT: /content/HAM10000/
-CHECKPOINT_ROOT: /content/drive/MyDrive/COLAB/Melanoma_Segmentation/checkpoints/
+DATASET_ROOT: ../datasets/HAM10000/
+CHECKPOINT_ROOT: ../checkpoints/
 LOSS_FUNC: DiceCELoss
 OPTIMIZER: ADAM
 LEARNING_RATE: 0.0001
