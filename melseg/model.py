@@ -22,14 +22,17 @@ def get_model() -> SamModel:
 
 # device
 def get_device(cuda_id=None) -> torch.device:
+    # check: cuda is available
     if torch.cuda.is_available() is False:
         logger.debug("CUDA is not available.")
         return torch.device("cpu")
 
-    cuda_ids = [i for i in range(torch.cuda.device_count())]
-
+    # default cuda is cuda:0
     if not cuda_id:
         return torch.device("cuda:0")
+
+    # select cuda-id
+    cuda_ids = [i for i in range(torch.cuda.device_count())]
 
     if cuda_id in cuda_ids:
         return torch.device(f"cuda:{cuda_id}")
