@@ -31,7 +31,7 @@ def get_device(cuda_id=None) -> torch.device:
     if not cuda_id:
         return torch.device("cuda:0")
 
-    # select cuda-id
+    # select cuda by cuda-id
     cuda_ids = [i for i in range(torch.cuda.device_count())]
 
     if cuda_id in cuda_ids:
