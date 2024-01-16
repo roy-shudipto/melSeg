@@ -21,8 +21,21 @@ def get_model() -> SamModel:
 
 
 # device
-def get_device() -> torch.device:
-    return torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+def get_device(cuda_id=None) -> torch.device:
+    if torch.cuda.is_available() is False:
+        return torch.device("cpu")
+
+    cuda_ids = [i for i in range(torch.cuda.device_count())]
+
+    if not cuda_id:
+        return torch.device("cuda:0")
+
+    if cuda_id in cuda_ids:
+        return torch.device(f"cuda:{cuda_id}")
+    else:
+        logger.error(f"[CUDA-ID: {cuda_id}] is not supported.")
+        logger.error(f"Available CUDA-IDs are: {cuda_ids}.")
+        exit(1)
 
 
 # loss-function

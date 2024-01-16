@@ -13,7 +13,7 @@ from melseg.dataset import SegDataset
 from melseg.trainer import Trainer
 
 
-def train(config: dict, config_ref=None) -> None:
+def train(config: dict, config_ref=None, cuda_id=None) -> None:
     # get training-config
     training_config = TrainingConfig(config)
     logger.info("Successfully read training-config.")
@@ -43,7 +43,7 @@ def train(config: dict, config_ref=None) -> None:
 
         # define model
         model = get_model()
-        device = get_device()
+        device = get_device(cuda_id=cuda_id)
         loss_func = get_loss_function(training_config.loss_func)
         optimizer = get_optimizer(
             training_config.optimizer,
@@ -86,7 +86,13 @@ def train(config: dict, config_ref=None) -> None:
     required=True,
     help="Path to the training-config [.yaml] file.",
 )
-def run_training(config) -> None:
+@click.option(
+    "--cuda_id",
+    type=int,
+    required=False,
+    help="CUDA-ID to train on a specific CUDA-GPU.",
+)
+def run_training(config, cuda_id) -> None:
     # convert config from str to pathlib.Path
     config_path = pathlib.Path(config)
 
@@ -102,7 +108,7 @@ def run_training(config) -> None:
 
         # train
         logger.info(f"Training with {config_ref}.")
-        train(config_variation, config_ref)
+        train(config_variation, config_ref, cuda_id)
 
 
 if __name__ == "__main__":
