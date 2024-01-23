@@ -1,9 +1,10 @@
-import click
+import argparse
 import pathlib
 import pandas as pd
+import yaml
 from loguru import logger
 
-from melseg.defaults import LOG_EXTENSION, LOG_HEADERS
+from melseg.defaults import ANALYSIS_LOG_NAME, CONFIG_NAME, LOG_EXTENSION, LOG_HEADERS
 
 
 def run_analysis(log_list) -> pd.DataFrame:
@@ -51,86 +52,124 @@ def run_analysis(log_list) -> pd.DataFrame:
     return df_analysis_log.reset_index(drop=True)
 
 
-@click.command()
-@click.option(
-    "--root",
-    type=str,
-    required=True,
-    help="Path to a directory with .csv logs.",
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--dir", nargs="+", required=True, help="Path to directory with .csv logs."
 )
-@click.option(
-    "--outpath",
-    type=str,
-    required=True,
-    help="Path to an output .csv file.",
+parser.add_argument(
+    "--out",
+    nargs="+",
+    required=False,
+    help=f"Path to output .csv file (default: [...]/{ANALYSIS_LOG_NAME})",
 )
-def analyze(root, outpath) -> None:
-    # convert paths from string to pathlib.Path
-    root = pathlib.Path(root)
-    outpath = pathlib.Path(outpath)
-
-    # check: root exists and is a directory
-    if not root.exists() or not root.is_dir():
-        logger.error(f"Root: [{root}] is not valid. It is expected to be a directory.")
-        exit(1)
-
-    # check: output file has a valid extension
-    if outpath.suffix.lower() != LOG_EXTENSION.lower():
-        logger.error(f"Output: [{outpath}] needs to have {LOG_EXTENSION} extension.")
-        exit(1)
-
-    # read logs in a list as pandas->DataFrame
-    log_list = []
-    for log_path in root.iterdir():
-        # skip log file with invalid extension
-        if log_path.suffix.lower() != LOG_EXTENSION.lower():
-            logger.debug(
-                f"Skipping file: [{log_path}] as it does not have [{LOG_EXTENSION}]"
-                " extension."
-            )
-            continue
-
-        # read log file as pandas->DataFrame. Skip if unable to read.
-        try:
-            df = pd.read_csv(log_path)
-        except UnicodeDecodeError or RuntimeError:
-            logger.debug(f"Skipping file: [{log_path}] as it is failed to be read.")
-            continue
-
-        # skip log file with invalid column list
-        if sorted(df.columns.tolist()) != sorted(LOG_HEADERS):
-            logger.debug(
-                f"Skipping file: [{log_path}] as it is has invalid columns:"
-                f" {df.columns.tolist()}. Expected columns are: {LOG_HEADERS}."
-            )
-            continue
-
-        # skip log with no data
-        if df.empty is True:
-            logger.debug(f"Skipping file: [{log_path}] as it has no data.")
-            continue
-
-        # append log as pandas->DataFrame
-        log_list.append({"df": df, "path": log_path})
-
-    # check: valid number of logs
-    if len(log_list) > 0:
-        logger.info(f"{len(log_list)} logs are found at [{root}].")
-    else:
-        logger.error(f"No valid log is found at [{root}].")
-        exit(1)
-
-    # run analysis
-    analysis_log = run_analysis(log_list)
-
-    # display analysis-DataFame
-    logger.info(f"\n{analysis_log}")
-
-    # save analysis-log
-    analysis_log.to_csv(outpath, index=False)
-    logger.info(f"Analysis-log is saved as: {outpath}")
-
+args = parser.parse_args()
 
 if __name__ == "__main__":
     logger.info("This pipeline analyzes log files of .csv format.")
-    analyze()
+
+    # parse arguments
+    dir_args = args.dir
+    out_args = args.out
+
+    # check: --out is given, but the number of arguments doesn't match the number of --dir arguments
+    if out_args and len(dir_args) != len(out_args):
+        logger.error(f"Given [--dir]: {dir_args}")
+        logger.error(f"Given [--out]: {out_args}")
+        logger.error(
+            "If [--out] is given, the number of [--out] arguments needs to match the"
+            " number of [--dir] arguments."
+        )
+        exit(1)
+
+    # check: --out is given, and the number of arguments matches the number of --dir arguments
+    elif out_args and len(dir_args) == len(out_args):
+        dir_list = [pathlib.Path(dir_arg) for dir_arg in dir_args]
+        out_list = [pathlib.Path(out_arg) for out_arg in out_args]
+
+    # check: --out is not given
+    elif out_args is None:
+        dir_list = [pathlib.Path(dir_arg) for dir_arg in dir_args]
+        out_list = [dir_arg / pathlib.Path(ANALYSIS_LOG_NAME) for dir_arg in dir_args]
+
+    # run analysis
+    for dir, out in zip(dir_list, out_list):
+        logger.info(f"Working on, Directory path: [{dir}] | Output file path: [{out}]")
+
+        # check: directory-path exists and is a directory
+        if not dir.exists() or not dir.is_dir():
+            logger.error(
+                f"Directory path: [{dir}] is not valid. It is expected to be a"
+                " directory."
+            )
+            exit(1)
+
+        # check: output file has a valid extension
+        if out.suffix.lower() != LOG_EXTENSION.lower():
+            logger.error(
+                f"Output file: [{out}] needs to have {LOG_EXTENSION} extension."
+            )
+            exit(1)
+
+        # read config
+        config_path = dir / CONFIG_NAME
+        try:
+            config = yaml.safe_load(open(config_path.as_posix()))
+        except FileNotFoundError:
+            config = None
+            logger.debug(f"Config file: {config_path} is not found.")
+
+        # read logs in a list as pandas->DataFrame
+        log_list = []
+        for log_path in dir.iterdir():
+            # skip log file with invalid extension
+            if log_path.suffix.lower() != LOG_EXTENSION.lower():
+                logger.debug(
+                    f"Skipping file: [{log_path}] as it does not have [{LOG_EXTENSION}]"
+                    " extension."
+                )
+                continue
+
+            # read log file as pandas->DataFrame. Skip if unable to read.
+            try:
+                df = pd.read_csv(log_path)
+            except UnicodeDecodeError or RuntimeError:
+                logger.debug(f"Skipping file: [{log_path}] as it is failed to be read.")
+                continue
+
+            # skip log file with invalid column list
+            if sorted(df.columns.tolist()) != sorted(LOG_HEADERS):
+                logger.debug(
+                    f"Skipping file: [{log_path}] as it is has invalid columns:"
+                    f" {df.columns.tolist()}. Expected columns are: {LOG_HEADERS}."
+                )
+                continue
+
+            # skip log with no data
+            if df.empty is True:
+                logger.debug(f"Skipping file: [{log_path}] as it has no data.")
+                continue
+
+            # append log as pandas->DataFrame
+            log_list.append({"df": df, "path": log_path})
+
+        # check: valid number of logs
+        if len(log_list) > 0:
+            logger.info(f"{len(log_list)} logs are found at [{dir}].")
+        else:
+            logger.error(f"No valid log is found at [{dir}].")
+            exit(1)
+
+        # run analysis
+        analysis_log = run_analysis(log_list)
+
+        # display config (if found)
+        if config:
+            for k, v in config.items():
+                logger.info(f"Training Config >> {k}: {v}")
+
+        # display analysis-DataFame
+        logger.info(f"Analysis:\n{analysis_log}")
+
+        # save analysis-log
+        analysis_log.to_csv(out, index=False)
+        logger.info(f"Analysis-log is saved as: {out}\n")

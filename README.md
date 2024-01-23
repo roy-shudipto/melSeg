@@ -33,7 +33,11 @@ This pipeline saves the analysis report as a *[.csv]* file.
 `python3 melseg_analyzer.py --help`
 
 #### Command example
-`python3 melseg_analyzer.py --root example_logs/ --outpath example_logs/log_analysis.csv`
+`python3 melseg_analyzer.py --dir example_logs/ --out example_logs/log_analysis.csv`
+
+or,
+
+`python3 melseg_analyzer.py --dir example_logs/`
 
 ## Split Config
 This pipeline generates individual sweeps from a training-config.

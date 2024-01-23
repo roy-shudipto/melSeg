@@ -1,6 +1,7 @@
+ANALYSIS_LOG_NAME = "log_analysis.csv"
 CHECKPOINT_EXTENSION = ".pt"
 CONFIG_EXTENSION = ".yaml"
-CONFIG_OUTPUT_NAME = "training_config.yaml"
+CONFIG_NAME = "training_config.yaml"
 DATASET_SHUFFLE_SEED = 5
 LOG_EXTENSION = ".csv"
 LOG_HEADERS = [

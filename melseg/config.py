@@ -8,7 +8,7 @@ from typing import List, Optional
 from melseg.defaults import (
     CHECKPOINT_EXTENSION,
     CONFIG_EXTENSION,
-    CONFIG_OUTPUT_NAME,
+    CONFIG_NAME,
     LOG_EXTENSION,
     LOSS_FUNC_LIST,
     OPTIMIZER_LIST,
@@ -67,7 +67,7 @@ class TrainingConfig:
         self.checkpoint_directory = self.checkpoint_root / pathlib.Path(checkpoint_name)
 
         # generate path for copying config-file
-        self.config_dst = self.checkpoint_directory / CONFIG_OUTPUT_NAME
+        self.config_dst = self.checkpoint_directory / CONFIG_NAME
 
     def _read_param(self, key: str, data_type: type) -> Optional[any]:
         # get the parameter value
