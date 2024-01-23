@@ -71,22 +71,22 @@ if __name__ == "__main__":
     dir_args = args.dir
     out_args = args.out
 
-    # check: --out is given, but the number of arguments doesn't match the number of --dir arguments
+    # check: number of [--dir] arguments doesn't match the number of [--our] arguments
     if out_args and len(dir_args) != len(out_args):
         logger.error(f"Given [--dir]: {dir_args}")
         logger.error(f"Given [--out]: {out_args}")
         logger.error(
-            "If [--out] is given, the number of [--out] arguments needs to match the"
-            " number of [--dir] arguments."
+            f"If [--out] is given, the number of [--dir] arguments ({len(dir_args)})"
+            f" needs to match the number of [--out] arguments ({len(out_args)})."
         )
         exit(1)
 
-    # check: --out is given, and the number of arguments matches the number of --dir arguments
+    # [--out] is given, and the number of arguments matches the number of [--dir] arguments
     elif out_args and len(dir_args) == len(out_args):
         dir_list = [pathlib.Path(dir_arg) for dir_arg in dir_args]
         out_list = [pathlib.Path(out_arg) for out_arg in out_args]
 
-    # check: --out is not given
+    # [--out] is not given
     elif out_args is None:
         dir_list = [pathlib.Path(dir_arg) for dir_arg in dir_args]
         out_list = [dir_arg / pathlib.Path(ANALYSIS_LOG_NAME) for dir_arg in dir_args]
