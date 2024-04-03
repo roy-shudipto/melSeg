@@ -8,6 +8,7 @@ python3 melseg_inference.py --help
 import click
 import numpy as np
 import pathlib
+import shutil
 import torch
 from loguru import logger
 from PIL import Image
@@ -66,7 +67,7 @@ def postprocess_output(output) -> Image:
     output = (output > 0.5).astype(np.uint8)
 
     # convert numpy->array to pillow->image, and return
-    return Image.fromarray(np.uint8(output * 255))
+    return Image.fromarray(np.uint8(output * 255.0))
 
 
 def prepare_model(checkpoint_path: pathlib.Path):
@@ -115,12 +116,19 @@ def prepare_model(checkpoint_path: pathlib.Path):
     help="Path to a directory to save the segmentation results in [.png] format.",
 )
 def run_inference(checkpoint, image_dir, mask_dir, out_dir) -> None:
-    # check: image_dir, mask_dir, out_dir are directories
-    for dir in [image_dir, mask_dir, out_dir]:
+    # check: image_dir, mask_dir are directories
+    for dir in [image_dir, mask_dir]:
         if pathlib.Path(dir).is_dir():
             continue
         logger.error(f"Path [{dir}] is not a directory.")
         exit(1)
+
+    # create out-dir, remove existing directory if needed
+    out_dir = pathlib.Path(out_dir)
+    if out_dir.exists():
+        shutil.rmtree(out_dir)
+    out_dir.mkdir(parents=True)
+    logger.info(f"Created a directory to save results at: {out_dir}")
 
     # prepare model
     model, device = prepare_model(pathlib.Path(checkpoint))
@@ -142,11 +150,6 @@ def run_inference(checkpoint, image_dir, mask_dir, out_dir) -> None:
             exit(1)
         logger.info(f"Found mask at: {image_path}")
 
-        # generate path for save the prediction
-        out_path = pathlib.Path(out_dir) / pathlib.Path(
-            image_path.stem + "_prediction"
-        ).with_suffix(".png")
-
         # preprocess input for inference
         input = preprocess_input(
             image_path=image_path, mask_path=mask_path, device=device
@@ -159,9 +162,26 @@ def run_inference(checkpoint, image_dir, mask_dir, out_dir) -> None:
             prediction = postprocess_output(output)
             logger.info(">> Model has completed prediction.")
 
+        # generate path for save the prediction
+        out_path = out_dir / pathlib.Path(image_path.stem + "_prediction").with_suffix(
+            ".png"
+        )
+
         # save prediction
         prediction.save(out_path)
         logger.info(f">> Prediction is saved as: {out_path}")
+
+        # save resized image to compare
+        image = Image.open(image_path)
+        image = image.resize(SAM_INPUT_SIZE)
+        image.save(out_dir / image_path.name)
+        logger.info(f">> Resized-image is saved as: {out_dir / image_path.name}")
+
+        # save resized ground-truth to compare
+        ground_truth_mask = Image.open(mask_path)
+        ground_truth_mask = ground_truth_mask.resize(SAM_INPUT_SIZE)
+        ground_truth_mask.save(out_dir / mask_path.name)
+        logger.info(f">> Resized-ground-truth is saved as: {out_dir / mask_path.name}")
 
 
 if __name__ == "__main__":
