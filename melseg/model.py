@@ -1,4 +1,5 @@
 import monai
+import pathlib
 import torch
 import torch.optim as optim
 from loguru import logger
@@ -16,6 +17,28 @@ def get_model() -> SamModel:
     for name, param in model.named_parameters():
         if name.startswith("vision_encoder") or name.startswith("prompt_encoder"):
             param.requires_grad_(False)
+
+    return model
+
+
+# load checkpoint
+def load_checkpoint(path: pathlib.Path) -> SamModel:
+    # check: checkpoint path exists and has [.pt] extension
+    if not path.exists() or path.suffix.lower() != ".pt":
+        logger.error(f"Invalid checkpoint path: {path.as_posix()}")
+        exit(1)
+
+    # get a model
+    model = get_model()
+
+    # load checkpoint's state-dict
+    try:
+        checkpoint = torch.load(path.as_posix())
+        model.load_state_dict(checkpoint["model_state_dict"])
+    except RuntimeError as e:
+        logger.error(f"Unable to load checkpoint from: {path.as_posix()}")
+        logger.error(f"Error: {e}")
+        exit(1)
 
     return model
 

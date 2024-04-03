@@ -1,3 +1,10 @@
+"""
+This pipeline analyzes log files of .csv format.
+
+Example usage:
+python3 melseg_analyzer.py --help
+"""
+
 import argparse
 import pathlib
 import pandas as pd

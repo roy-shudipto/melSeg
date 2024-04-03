@@ -41,6 +41,17 @@ or,
 
 `python3 melseg_analyzer.py --dir example_logs/`
 
+
+## Run Inference
+This pipeline runs inference using trained melSeg models.
+
+#### Check help
+`python3 melseg_inference.py --help`
+
+#### Command example
+`python3 melseg_inference.py --checkpoint ../checkpoint_fold3.pt --image ../image.jpg --mask ../mask.png --save ../result.png`
+
+
 ## Split Config
 This pipeline generates individual sweeps from a training-config.
 
