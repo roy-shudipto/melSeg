@@ -49,7 +49,7 @@ This pipeline runs inference using trained melSeg models.
 `python3 melseg_inference.py --help`
 
 #### Command example
-`python3 melseg_inference.py --checkpoint ../checkpoint_fold3.pt --image ../image.jpg --mask ../mask.png --save ../result.png`
+`python3 melseg_inference.py --checkpoint ../checkpoint_fold3.pt --image_dir ../datasets/HAM50/images/ --mask_dir ../datasets/HAM50/masks/ --out_dir ../datasets/HAM50/results/`
 
 
 ## Split Config

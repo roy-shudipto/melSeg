@@ -53,7 +53,7 @@ def preprocess_input(*, image_path: str, mask_path: str, device: torch.device) -
     processor = SamProcessor.from_pretrained(SAM_PRETRAINED_MODEL)
     input = processor(image, input_boxes=[[prompt]], return_tensors="pt")
 
-    # move the input tensor to the device and return
+    # move the input tensor to the device, and return
     return {k: v.to(device) for k, v in input.items()}
 
 
@@ -65,39 +65,14 @@ def postprocess_output(output) -> Image:
     output = output.cpu().numpy().squeeze()
     output = (output > 0.5).astype(np.uint8)
 
-    # convert numpy array to Pillow->Image and return
+    # convert numpy->array to pillow->image, and return
     return Image.fromarray(np.uint8(output * 255))
 
 
-@click.command()
-@click.option(
-    "--checkpoint",
-    type=str,
-    required=True,
-    help="Path to a meSeg checkpoint in [.pt] format.",
-)
-@click.option(
-    "--image",
-    type=str,
-    required=True,
-    help="Path to an image for running segmentation.",
-)
-@click.option(
-    "--mask",
-    type=str,
-    required=True,
-    help="Path to the mask of given image for running segmentation.",
-)
-@click.option(
-    "--save",
-    type=str,
-    required=True,
-    help="Path to save the segmentation result in [.png] format.",
-)
-def run_inference(checkpoint, image, mask, save) -> None:
+def prepare_model(checkpoint_path: pathlib.Path):
     # load checkpoint's state-dict
-    model = load_checkpoint(pathlib.Path(checkpoint))
-    logger.info(f">> Loaded checkpoint from: {checkpoint}")
+    model = load_checkpoint(checkpoint_path)
+    logger.info(f">> Loaded checkpoint from: {checkpoint_path.as_posix()}")
 
     # get device
     device = get_device()
@@ -111,19 +86,82 @@ def run_inference(checkpoint, image, mask, save) -> None:
     model.eval()
     logger.info(">> Model is set to eval-mode.")
 
-    # preprocess input for inference
-    input = preprocess_input(image_path=image, mask_path=mask, device=device)
-    logger.info(">> Pre-processed input.")
+    return model, device
 
-    # run model to get prediction
-    with torch.no_grad():
-        output = model(**input, multimask_output=False)
-        prediction = postprocess_output(output)
-        logger.info(">> Model has completed prediction.")
 
-    # save prediction
-    prediction.save(save)
-    logger.info(f">> Prediction is saved as: {save}")
+@click.command()
+@click.option(
+    "--checkpoint",
+    type=str,
+    required=True,
+    help="Path to a meSeg checkpoint in [.pt] format.",
+)
+@click.option(
+    "--image_dir",
+    type=str,
+    required=True,
+    help="Path a directory with images for running segmentation.",
+)
+@click.option(
+    "--mask_dir",
+    type=str,
+    required=True,
+    help="Path a directory with corresponding masks for running segmentation.",
+)
+@click.option(
+    "--out_dir",
+    type=str,
+    required=True,
+    help="Path to a directory to save the segmentation results in [.png] format.",
+)
+def run_inference(checkpoint, image_dir, mask_dir, out_dir) -> None:
+    # check: image_dir, mask_dir, out_dir are directories
+    for dir in [image_dir, mask_dir, out_dir]:
+        if pathlib.Path(dir).is_dir():
+            continue
+        logger.error(f"Path [{dir}] is not a directory.")
+        exit(1)
+
+    # prepare model
+    model, device = prepare_model(pathlib.Path(checkpoint))
+
+    # run inference on each image
+    for image_path in pathlib.Path(image_dir).iterdir():
+        # check: image file is valid
+        if not image_path.is_file() or image_path.suffix.lower() != ".jpg":
+            logger.debug(f"Skipping file: {image_path}")
+            continue
+        logger.info(f"Working with image: {image_path}")
+
+        # get the mask
+        mask_path = pathlib.Path(mask_dir) / pathlib.Path(
+            image_path.stem + "_segmentation"
+        ).with_suffix(".png")
+        if not mask_path.exists():
+            logger.error(f"Unable to find mask from: {mask_path}")
+            exit(1)
+        logger.info(f"Found mask at: {image_path}")
+
+        # generate path for save the prediction
+        out_path = pathlib.Path(out_dir) / pathlib.Path(
+            image_path.stem + "_prediction"
+        ).with_suffix(".png")
+
+        # preprocess input for inference
+        input = preprocess_input(
+            image_path=image_path, mask_path=mask_path, device=device
+        )
+        logger.info(">> Pre-processed input.")
+
+        # run model to get prediction
+        with torch.no_grad():
+            output = model(**input, multimask_output=False)
+            prediction = postprocess_output(output)
+            logger.info(">> Model has completed prediction.")
+
+        # save prediction
+        prediction.save(out_path)
+        logger.info(f">> Prediction is saved as: {out_path}")
 
 
 if __name__ == "__main__":
