@@ -22,6 +22,8 @@ Training-parameters can be seen or, modified from `training_config.yaml`.
 #### Command example
 `python3 melseg_trainer.py --config training_config.yaml`
 
+`python3 melseg_trainer.py --config example_configs/training_config_01.yaml --cuda_id 0`
+
 
 ## Run Analysis
 This pipeline analyzes the *training-logs [.csv]* of a cross-validation run, by:

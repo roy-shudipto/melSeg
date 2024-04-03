@@ -1,3 +1,9 @@
+"""
+This pipeline trains a semantic segmentation model.
+
+Example usage:
+python3 melseg_trainer.py --config example_configs/training_config_01.yaml --cuda_id 0
+"""
 import click
 import pathlib
 from loguru import logger
