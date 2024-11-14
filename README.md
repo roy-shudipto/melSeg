@@ -2,6 +2,7 @@
 This is a tool to train semantic-segmentation model targeting skin leison segmentation in digital images.
 
 ## Install requirements
+`pip install --upgrade pip`
 `pip install -r requirements.txt`
 
 ## Download and structure HAM10000 Dataset
@@ -60,6 +61,15 @@ This pipeline generates individual sweeps from a training-config.
 
 #### Command example
 `python3 config_splitter.py --config training_config.yaml --outdir example_configs`
+
+## Visualize Result
+This pipeline draws the contours of prediction and ground-truth mask on the image for visualization.
+
+#### Check help
+`python3 result_viz.py --help`
+
+#### Command example
+`python3 result_viz.py --result_root ./example_result --image_tag ISIC_0024308`
 
 ## Code Formatting
 **Black** is a Python code formatter that enforces a consistent style by rewriting code to conform to **PEP 8** style guide.
